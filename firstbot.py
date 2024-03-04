@@ -1,14 +1,14 @@
+# import the gym and stable baselines 3 libraries
 import rlgym
-from stable_baselines3 import PPO
-from rlgym.utils.reward_functions.common_rewards import LiuDistancePlayerToBallReward, VelocityBallToGoalReward, BallYCoordinateReward
+from stable_baselines3.ppo import PPO
+from rlgym_tools.sb3_utils import SB3SingleInstanceEnv
 
-# Create the environment
-env = rlgym.make("default", self_play=True, spawn_opponents=False, team_size=1, tick_skip=8, reward_fn=[LiuDistancePlayerToBallReward(), VelocityBallToGoalReward(), BallYCoordinateReward()])
+# setup the RLGym environment
+gym_env = rlgym.make(use_injector=True, self_play=True)
 
-# Train the agent
-model = PPO("MlpPolicy", env, verbose=1)
+# wrap the RLGym environment with the single instance wrapper
+env = SB3SingleInstanceEnv(gym_env)
 
-model.learn(total_timesteps=100000)
-
-# Save the agent
-model.save("models/ppo_default")
+# create a PPO instance and start learning
+learner = PPO(policy="MlpPolicy", env=env, verbose=1)
+learner.learn(1_000_000)
