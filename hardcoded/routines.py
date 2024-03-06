@@ -145,7 +145,21 @@ class flip():
         else:
             agent.pop()
             agent.push(recovery())
-            
+
+class speed_flip():
+    #Performs a speed flip, a fast flipping maneuver to gain speed
+    def __init__(self, target):
+        self.target = target
+    def run(self, agent):
+        car_to_target = self.target - agent.me.location
+        distance_remaining = car_to_target.flatten().magnitude()
+        if distance_remaining > 100:
+            defaultThrottle(agent, 2300)
+        else:
+            flip_direction = car_to_target.normalize()
+            flip_action = flip(flip_direction)
+            flip_action.run(agent)
+
 class goto():
     #Drives towards a designated (stationary) target
     #Optional vector controls where the car should be pointing upon reaching the target
@@ -347,6 +361,18 @@ class kickoff():
             agent.pop()
             #flip towards opponent goal
             agent.push(flip(agent.me.local(agent.foe_goal.location - agent.me.location)))
+
+class speed_flip_kickoff():
+    #A kickoff that uses a speed flip to hit the ball
+    def run(self,agent):
+        car_to_ball = agent.ball.location - agent.me.location
+        distance = car_to_ball.flatten().magnitude()
+        if distance < 100:
+            flip_direction = car_to_ball.normalize()
+            flip_action = flip(flip_direction)
+            flip_action.run(agent)
+        else:
+            defaultThrottle(agent, 2300)
 
 class recovery():
     #Point towards our velocity vector and land upright, unless we aren't moving very fast
